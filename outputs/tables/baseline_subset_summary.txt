@@ -1,0 +1,20 @@
+Part 4 — Melanoma PBMC baseline (t=0) miraclib subset
+Total samples:  656
+Total subjects: 656
+
+Samples / subjects per project:
+project_id  n_samples  n_subjects
+      prj1        384         384
+      prj3        272         272
+
+Subjects by response:
+response  n_subjects
+      no         325
+     yes         331
+
+Subjects by sex:
+sex  n_subjects
+  F         312
+  M         344
+
+Note: exploratory analyses involving quintazide were out of scope for this trial.
