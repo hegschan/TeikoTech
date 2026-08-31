@@ -95,10 +95,22 @@ def build() -> Path:
         text="n_samples",
         title="Baseline samples per project",
         labels={"project_id": "Project", "n_samples": "Samples"},
-        color="project_id",
-        color_discrete_sequence=px.colors.qualitative.Pastel,
     )
-    fig_proj.update_layout(showlegend=False, paper_bgcolor="white", plot_bgcolor="white")
+    fig_proj.update_traces(
+        marker_color=["#80CBC4", "#A5D6A7"][: len(by_project)],
+        width=0.45,
+        textposition="outside",
+    )
+    fig_proj.update_layout(
+        showlegend=False,
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+        bargap=0.35,
+        yaxis_title="Samples",
+        xaxis_title="Project",
+        xaxis={"type": "category", "categoryorder": "category ascending"},
+        margin=dict(t=50, b=40, l=50, r=20),
+    )
 
     fig_resp = px.pie(
         by_response,
@@ -211,8 +223,13 @@ def build() -> Path:
     }}
     .grid3 {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }}
+    .grid3 > div {{
+      min-width: 0;
+      overflow: hidden;
     }}
     table {{
       width: 100%;
