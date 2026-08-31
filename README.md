@@ -25,9 +25,13 @@ python3 dashboard.py
 
 ## Dashboard
 
-http://127.0.0.1:8050
+Public dashboard (GitHub Pages):
 
-In Codespaces, forward port 8050 and open it from the Ports tab.
+https://hegschan.github.io/TeikoTech/
+
+Local Dash app (for Codespaces grading with `make dashboard`):
+
+http://127.0.0.1:8050
 
 ## Database schema
 
@@ -46,9 +50,11 @@ Scaling: the same layout works if you move to Postgres later. With hundreds of p
 
 * `load_data.py`: Part 1. Create the schema and load `cell-count.csv`
 * `analysis.py`: Parts 2 to 4. Frequency table, responder stats and boxplots, baseline subset
-* `dashboard.py`: interactive Dash UI over the DB and `outputs/`
+* `dashboard.py`: interactive Dash UI over the DB and `outputs/` (local via `make dashboard`)
+* `build_public_dashboard.py`: builds the public GitHub Pages site under `docs/`
 * `Makefile`: `setup`, `pipeline`, and `dashboard` for Codespaces grading
 * `requirements.txt`: Python dependencies
 * `outputs/`: generated tables and figures
+* `docs/`: public dashboard HTML served by GitHub Pages
 
 I kept load, analysis, and the dashboard in separate scripts on purpose. Part 1 has to be a root level `load_data.py` with no CLI args, so ingestion stays isolated and idempotent (it rebuilds the DB each run). Analysis then only talks to the database and writes under `outputs/`, which makes `make pipeline` a simple two step sequence. The dashboard reads those same artifacts instead of reimplementing the stats, so what you see in the UI matches what the pipeline produced.

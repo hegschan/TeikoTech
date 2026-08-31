@@ -7,6 +7,7 @@ setup:
 pipeline:
 	MPLBACKEND=Agg python3 load_data.py
 	MPLBACKEND=Agg python3 analysis.py
+	python3 build_public_dashboard.py
 
 dashboard:
 	python3 dashboard.py
