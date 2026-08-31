@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 ROOT = Path(__file__).resolve().parent
 TABLE_DIR = ROOT / "outputs" / "tables"
@@ -122,25 +123,58 @@ def build() -> Path:
         margin=dict(t=60, b=50, l=55, r=20),
     )
 
-    fig_resp = px.pie(
-        by_response,
-        names="response",
-        values="n_subjects",
-        title="Subjects by response",
-        color="response",
-        color_discrete_map={"yes": "#66BB6A", "no": "#EF9A9A"},
-    )
-    fig_resp.update_layout(paper_bgcolor="white")
+    resp_colors = [
+        {"yes": "#66BB6A", "no": "#EF9A9A"}.get(str(v), "#BDBDBD")
+        for v in by_response["response"].tolist()
+    ]
+    sex_colors = [
+        {"M": "#90CAF9", "F": "#F48FB1"}.get(str(v), "#BDBDBD")
+        for v in by_sex["sex"].tolist()
+    ]
 
-    fig_sex = px.pie(
-        by_sex,
-        names="sex",
-        values="n_subjects",
-        title="Subjects by sex",
-        color="sex",
-        color_discrete_map={"M": "#90CAF9", "F": "#F48FB1"},
+    fig_pies = make_subplots(
+        rows=1,
+        cols=2,
+        specs=[[{"type": "domain"}, {"type": "domain"}]],
+        subplot_titles=("Subjects by response", "Subjects by sex"),
+        horizontal_spacing=0.08,
     )
-    fig_sex.update_layout(paper_bgcolor="white")
+    fig_pies.add_trace(
+        go.Pie(
+            labels=by_response["response"].tolist(),
+            values=by_response["n_subjects"].tolist(),
+            marker=dict(colors=resp_colors, line=dict(color="white", width=2)),
+            textinfo="label+percent",
+            textposition="inside",
+            insidetextorientation="horizontal",
+            hovertemplate="%{label}: %{value} subjects (%{percent})<extra></extra>",
+            showlegend=False,
+            sort=False,
+        ),
+        row=1,
+        col=1,
+    )
+    fig_pies.add_trace(
+        go.Pie(
+            labels=by_sex["sex"].tolist(),
+            values=by_sex["n_subjects"].tolist(),
+            marker=dict(colors=sex_colors, line=dict(color="white", width=2)),
+            textinfo="label+percent",
+            textposition="inside",
+            insidetextorientation="horizontal",
+            hovertemplate="%{label}: %{value} subjects (%{percent})<extra></extra>",
+            showlegend=False,
+            sort=False,
+        ),
+        row=1,
+        col=2,
+    )
+    fig_pies.update_layout(
+        paper_bgcolor="white",
+        margin=dict(t=55, b=20, l=20, r=20),
+        font=dict(size=13, color="#333333"),
+    )
+    fig_pies.update_annotations(font_size=14, font_color="#333333")
 
     n_base_samples = baseline["sample_id"].nunique()
     n_base_subjects = baseline["subject_id"].nunique()
@@ -238,7 +272,10 @@ def build() -> Path:
     }}
     .chart-full {{
       width: 100%;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+    }}
+    .js-plotly-plot {{
+      width: 100% !important;
     }}
     .js-plotly-plot .plotly .modebar {{
       top: 0 !important;
@@ -316,10 +353,7 @@ def build() -> Path:
       Total: {n_base_samples} samples · {n_base_subjects} subjects.
     </p>
     <div class="chart-full">{fig_to_div(fig_proj)}</div>
-    <div class="grid2">
-      <div>{fig_to_div(fig_resp)}</div>
-      <div>{fig_to_div(fig_sex)}</div>
-    </div>
+    <div class="chart-full">{fig_to_div(fig_pies)}</div>
   </section>
 
   <footer>
