@@ -357,7 +357,7 @@ def build() -> Path:
   </section>
 
   <footer>
-    Built from pipeline outputs · Loblaw Bio miraclib trial analysis
+    Built from pipeline outputs · Loblaw Bio miraclib trial analysis · Hegen Chang
   </footer>
 </body>
 </html>
