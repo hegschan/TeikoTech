@@ -25,13 +25,7 @@ python3 dashboard.py
 
 ## Dashboard
 
-Public dashboard (GitHub Pages):
-
 https://hegschan.github.io/TeikoTech/
-
-Local Dash app (for Codespaces grading with `make dashboard`):
-
-http://127.0.0.1:8050
 
 ## Database schema
 
