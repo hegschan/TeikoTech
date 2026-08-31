@@ -16,10 +16,15 @@ POPULATIONS = ["b_cell", "cd8_t_cell", "cd4_t_cell", "nk_cell", "monocyte"]
 
 
 def fig_to_div(fig: go.Figure, include_js: bool = False) -> str:
+    fig.update_layout(height=420, autosize=True)
     return fig.to_html(
         full_html=False,
         include_plotlyjs="cdn" if include_js else False,
-        config={"displayModeBar": True, "responsive": True},
+        config={
+            "displayModeBar": True,
+            "responsive": True,
+            "displaylogo": False,
+        },
     )
 
 
@@ -87,29 +92,34 @@ def build() -> Path:
     )
     stats_head = "".join(f"<th>{c}</th>" for c in stats.columns)
 
-    # Part 4
-    fig_proj = px.bar(
-        by_project,
-        x="project_id",
-        y="n_samples",
-        text="n_samples",
-        title="Baseline samples per project",
-        labels={"project_id": "Project", "n_samples": "Samples"},
-    )
-    fig_proj.update_traces(
-        marker_color=["#80CBC4", "#A5D6A7"][: len(by_project)],
-        width=0.45,
-        textposition="outside",
+    # Part 4 — single-series bars so both projects render side by side
+    ymax = float(by_project["n_samples"].max()) * 1.2
+    fig_proj = go.Figure(
+        data=[
+            go.Bar(
+                x=by_project["project_id"].tolist(),
+                y=by_project["n_samples"].tolist(),
+                text=by_project["n_samples"].tolist(),
+                textposition="outside",
+                marker_color=["#80CBC4", "#A5D6A7"][: len(by_project)],
+                hovertemplate="Project=%{x}<br>Samples=%{y}<extra></extra>",
+            )
+        ]
     )
     fig_proj.update_layout(
+        title="Baseline samples per project",
         showlegend=False,
         paper_bgcolor="white",
         plot_bgcolor="white",
-        bargap=0.35,
-        yaxis_title="Samples",
-        xaxis_title="Project",
-        xaxis={"type": "category", "categoryorder": "category ascending"},
-        margin=dict(t=50, b=40, l=50, r=20),
+        bargap=0.4,
+        yaxis=dict(title="Samples", range=[0, ymax]),
+        xaxis=dict(
+            title="Project",
+            type="category",
+            categoryorder="array",
+            categoryarray=by_project["project_id"].tolist(),
+        ),
+        margin=dict(t=60, b=50, l=55, r=20),
     )
 
     fig_resp = px.pie(
@@ -221,15 +231,17 @@ def build() -> Path:
       border-radius: 8px;
       padding: 12px 14px;
     }}
-    .grid3 {{
+    .grid2 {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 16px;
-      align-items: start;
     }}
-    .grid3 > div {{
-      min-width: 0;
-      overflow: hidden;
+    .chart-full {{
+      width: 100%;
+      margin-bottom: 12px;
+    }}
+    .js-plotly-plot .plotly .modebar {{
+      top: 0 !important;
     }}
     table {{
       width: 100%;
@@ -303,8 +315,8 @@ def build() -> Path:
       time_from_treatment_start=0.
       Total: {n_base_samples} samples · {n_base_subjects} subjects.
     </p>
-    <div class="grid3">
-      <div>{fig_to_div(fig_proj)}</div>
+    <div class="chart-full">{fig_to_div(fig_proj)}</div>
+    <div class="grid2">
       <div>{fig_to_div(fig_resp)}</div>
       <div>{fig_to_div(fig_sex)}</div>
     </div>
