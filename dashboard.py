@@ -115,25 +115,20 @@ app.layout = dbc.Container(
                         "letterSpacing": "0.28em",
                         "fontSize": "0.75rem",
                         "marginBottom": "4px",
-                        "color": "#95D5B2",
+                        "color": "#2E7D32",
                         "fontWeight": "600",
                     },
                 ),
                 html.H1(
                     "Miraclib Immune Cell Dashboard",
-                    style={"margin": "0 0 6px 0", "fontWeight": "700"},
-                ),
-                html.P(
-                    "Explore population frequencies, responder differences, "
-                    "and baseline melanoma PBMC subsets from the miraclib trial.",
-                    style={"margin": 0, "opacity": 0.85, "maxWidth": "720px"},
+                    style={"margin": "0", "fontWeight": "700", "color": "#1B5E20"},
                 ),
             ],
             style={
-                "background": "linear-gradient(135deg, #081C15 0%, #1B4332 55%, #2D6A4F 100%)",
-                "color": "white",
-                "padding": "36px 28px",
-                "borderRadius": "12px",
+                "background": "#C8E6C9",
+                "color": "#1B5E20",
+                "padding": "28px",
+                "borderRadius": "8px",
                 "marginTop": "18px",
                 "marginBottom": "22px",
             },
@@ -247,16 +242,20 @@ def render(tab: str, _n: int):
         )
         fig.update_layout(showlegend=False, margin=dict(t=50, b=20))
 
+        # Only send a preview to the browser. Shipping all 52k rows freezes the page.
+        preview = freq.head(500)
         content = html.Div(
             [
                 html.H4("Relative frequency of each cell population per sample"),
                 html.P(
                     "Each row is one population from one sample. "
                     "percentage = count / total_count × 100. "
-                    f"Showing all {len(freq):,} rows (sortable / filterable)."
+                    f"Full table has {len(freq):,} rows in "
+                    "`outputs/tables/cell_population_frequencies.csv`. "
+                    f"Showing the first {len(preview):,} rows here (sortable / filterable)."
                 ),
                 dcc.Graph(figure=fig),
-                style_table(freq, page_size=15),
+                style_table(preview, page_size=15),
             ]
         )
         return kpi_s, kpi_u, kpi_b, content
@@ -277,7 +276,7 @@ def render(tab: str, _n: int):
             facet_col="population",
             category_orders={"response": ["yes", "no"], "population": POPULATIONS},
             color_discrete_map={"yes": "#2A9D8F", "no": "#E76F51"},
-            points="all",
+            points="outliers",
             title="Melanoma · miraclib · PBMC — responders vs non-responders",
             labels={"percentage": "Relative frequency (%)", "response": "Response"},
         )
@@ -301,15 +300,6 @@ def render(tab: str, _n: int):
                 className="alert alert-secondary",
             )
 
-        box_img = None
-        static_plot = FIG_DIR / "responder_vs_nonresponder_boxplots.png"
-        if static_plot.exists():
-            # Prefer interactive Plotly; still note the pipeline PNG exists.
-            box_img = html.P(
-                f"Static pipeline figure also saved at {static_plot.relative_to(ROOT)}.",
-                className="text-muted",
-            )
-
         content = html.Div(
             [
                 html.H4("Responder vs non-responder comparison"),
@@ -318,7 +308,6 @@ def render(tab: str, _n: int):
                     "Relative frequencies come from the Part 2 summary table."
                 ),
                 dcc.Graph(figure=fig),
-                box_img,
                 conclusion,
                 html.H5("Statistical summary"),
                 style_table(stats_df, page_size=10),
