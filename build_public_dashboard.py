@@ -255,8 +255,6 @@ def build() -> Path:
     <p class="lead">
       Relative frequency of each immune cell population per sample
       (percentage = count / total_count × 100).
-      Full table: {len(freq):,} rows in
-      <code>outputs/tables/cell_population_frequencies.csv</code>.
     </p>
     {fig_to_div(fig2, include_js=True)}
     <h3>Preview (first 25 rows)</h3>
